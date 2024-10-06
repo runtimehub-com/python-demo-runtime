@@ -18,7 +18,7 @@ class SharedResourceWithLock:
             print(f"Thread {threading.current_thread().name} released lock, counter = {self.counter}")
 
 def task_with_lock(resource):
-    for _ in range(8):
+    for _ in range(3):
         resource.increment()
 
 rlock = threading.RLock()
@@ -83,10 +83,43 @@ def func4():
     print("print in func4")
     func3()
 
-def main():
+"""Decorator"""
+def loop_decorator(func):
+    def wrapper(*args, **kwargs):
+        print("Starting the loop...")
+        func(*args, **kwargs)
+        print("Loop ended.")
+    return wrapper
 
+@loop_decorator
+def my_while_loop():
+    count = 0
+    while count < 5:
+        print(count)
+        count += 1
+
+def decorator_one(func):
+    def wrapper():
+        print("Decorator One Applied")
+        func()
+    return wrapper
+
+def decorator_two(func):
+    def wrapper():
+        print("Decorator Two Applied")
+        func()
+    return wrapper
+
+@decorator_one
+@decorator_two # The order of applying decorators is from the innermost to the outermost, with the decorator closest to the function or class definition being applied first.
+def my_function():
+    print("Hello from my_function!")
+
+def main():
     print("print in main")
     func4()
+
+    my_function()
 
     # Python Syntax and Data Structure Examples
 
@@ -123,6 +156,8 @@ def main():
             print("Unknown Status")
 
     # 3. Loop statement
+    my_while_loop()
+
     print("List elements:")
     for item in lst:
         print(item)
@@ -187,6 +222,18 @@ def main():
         print(f"File operation error: {e}")
 
     # 9. Class and objects
+    """Decorator"""
+    def add_greeting(cls):
+        original_method = cls.greet
+
+        def new_greet(self):
+            print("Hello! I am an Animal.")
+            return original_method(self)
+
+        cls.greet = new_greet
+        return cls
+
+    @add_greeting
     class Animal:
         def __init__(self, name):
             self.name = name
@@ -194,12 +241,16 @@ def main():
         def speak(self):
             return f"{self.name} makes a sound"
 
+        def greet(self):
+            return "Greetings from Animal!"
+
     class Dog(Animal):
         def speak(self):
             return f"{self.name} barks"
 
     dog = Dog("Buddy")
     print(dog.speak())
+    print(dog.greet())
 
     class MyClass:
         static_variable = "Initial value"
@@ -325,7 +376,7 @@ def main():
     # threading
     print("\n--- Lock Example ---")
     resource_with_lock = SharedResourceWithLock()
-    threads = [threading.Thread(target=task_with_lock, args=(resource_with_lock,), name=f'Thread-{i}') for i in range(10)]
+    threads = [threading.Thread(target=task_with_lock, args=(resource_with_lock,), name=f'Thread-{i}') for i in range(3)]
 
     for thread in threads:
         thread.start()
